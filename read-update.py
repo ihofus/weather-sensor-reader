@@ -1,7 +1,9 @@
 # pylint: disable=C0111
+#needs code from AdaFruit: https://github.com/adafruit/Adafruit_Python_DHT
 import sys
 import configparser
 import requests
+import Adafruit_DHT
 
 def post_data(temperature, humidity, url, api_key):
     form = {'api_key': api_key, 'field1': temperature, 'field2': humidity}
@@ -9,8 +11,9 @@ def post_data(temperature, humidity, url, api_key):
     print resp.status_code
 
 def read_data(pin, sensor):
-    #TODO read real sensor data
-    return 44, 55
+    sensor_types = {'11': Adafruit_DHT.DHT11, '22': Adafruit_DHT.DHT22, '2302': Adafruit_DHT.AM2302}
+    sensor_type = sensor_types[sensor]
+    return Adafruit_DHT.read_retry(sensor_type, pin)
 
 def load_config(config_file):
     config = configparser.ConfigParser()
@@ -29,9 +32,11 @@ def read_update_data(config_file):
     print 'Reading sensor... '
     temperature, humidity = read_data(pin, sensor)
 
-    print 'Posting... '
-    post_data(temperature, humidity, url, api_key)
-
+    if humidity is not None and temperature is not None:
+        print 'Posting... '
+        post_data(round(temperature, 2), round(humidity, 2), url, api_key)
+    else:
+        print 'Failed to read data.'
 
 if __name__ == "__main__":
     CONFIG_FILE = 'configs.ini'
@@ -39,3 +44,4 @@ if __name__ == "__main__":
         CONFIG_FILE = sys.argv[1]
 
     read_update_data(CONFIG_FILE)
+
