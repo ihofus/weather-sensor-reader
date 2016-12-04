@@ -1,4 +1,4 @@
-Simple data logging to thingspeak.com script.
+Simple sensor data logging to thingspeak.com using python and Raspberry Pi.
 
 Requires code from https://github.com/adafruit/Adafruit_Python_DHT
 
